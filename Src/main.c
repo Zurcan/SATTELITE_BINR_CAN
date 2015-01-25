@@ -1,7 +1,7 @@
 /**
   ******************************************************************************
   * File Name          : main.c
-  * Date               : 23/01/2015 17:35:46
+  * Date               : 25/01/2015 14:18:19
   * Description        : Main program body
   ******************************************************************************
   *
@@ -113,6 +113,7 @@ int rxCounter;
 bool beginCANTransmitFlag;
 int canMessCounter=0;
 char inc;
+int rpuChannelsQty=0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -178,6 +179,13 @@ int main(void)
   HAL_Delay(100);
   AT_COM[0] = 0x10;
   AT_COM[1] = 0x27;
+  AT_COM[2] = 0x01;
+  AT_COM[3] = 0x10;
+  AT_COM[4] = 0x03;
+  HAL_UART_Transmit_IT(&huart4, AT_COM, 5);
+  HAL_Delay(100);
+  AT_COM[0] = 0x10;
+  AT_COM[1] = 0xd4;
   AT_COM[2] = 0x01;
   AT_COM[3] = 0x10;
   AT_COM[4] = 0x03;
@@ -830,7 +838,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 //	  								HAL_GPIO_TogglePin(CAN_SHDN_PORT,CAN_SHDN_PIN);
 //	  								h41BINRok = false;
 //	  								h88BINRok = false;
-	  								beginCANTransmitFlag = true;
+//	  								beginCANTransmitFlag = true;
 	  								NumberSatateRxBINR=sHEAD;
 	  							}
 	  							else
@@ -838,6 +846,30 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 	  							r=0x88;
 	  //							commandToSend = 0x13;
 	  //							changeCommand = true;
+	  						}
+	  						if(r==0xe4)
+	  						{
+	  							if(CntRxBINR==17)
+	  								rpuChannelsQty = RxBINR[17];
+	  							for(CntU4=0;CntU4<=CntRxBINR;CntU4++)
+	  							{
+	  								hE4BINRmas[CntU4]=RxBINR[CntU4+1];
+	  							}
+	  							hE4BINRok = true;
+	  										//флаг притяного массива Е4
+//	  							h88BINRok=true;				//флаг притяного массива Е4
+	  							if(h88BINRok&&h41BINRok)
+	  							{
+//	  								HAL_GPIO_TogglePin(CAN_SHDN_PORT,CAN_SHDN_PIN);
+
+//	  								beginCANTransmitFlag = true;
+	  								NumberSatateRxBINR=sHEAD;
+	  							}
+	  							else
+	  								NumberSatateRxBINR=sHEAD;
+	  //
+	  //							else
+	  							r=CntU4;
 	  						}
 	  						break;
 	  					}
