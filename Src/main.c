@@ -1,7 +1,7 @@
 /**
   ******************************************************************************
   * File Name          : main.c
-  * Date               : 25/01/2015 14:18:19
+  * Date               : 27/01/2015 17:59:17
   * Description        : Main program body
   ******************************************************************************
   *
@@ -198,7 +198,7 @@ int main(void)
   AT_COM[4] = 0x10;
   AT_COM[5] = 0x03;
   HAL_UART_Transmit_IT(&huart4, AT_COM, 6);
-  HAL_Delay(100);
+  HAL_Delay(20000);
   /* USER CODE END 2 */
 
   /* USER CODE BEGIN 3 */
@@ -644,8 +644,13 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 		volatile char 	RBINR[2048];			//буфер передатчика
 		volatile bool tmp2=false;
 		uint8_t rxbyte=0,t,r;
+//		if(huart->ErrorCode==UART_FLAG_ORE)
+//			__HAL_UART_CLEAR_FLAG(huart,UART_FLAG_ORE);
+//	huart->ErrorCode = 0;
   if(huart->Instance==UART4)
   {
+//	  if(huart->ErrorCode&(UART_FLAG_FE|UART_FLAG_ORE|UART_FLAG_PE|UART_FLAG_NE)==0)
+	  {
 	     	        rxbyte = (char)UART4->DR;
 	  				switch (NumberSatateRxBINR)
 	  				{
@@ -875,13 +880,40 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 	  					}
 	  //					break;
 	  				}
+	  }
+//	  else
+//	  {
+
+//		  uint8_t *dat;
+//		  HAL_UART_Receive(huart,dat,1,10);
+//	  }
 
 	  //			}
 //добавить временную метку конца массива куда-нибудь
 	 HAL_UART_Receive_IT(&huart4, mas, 1);
   }
+}
+void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
+{
+	uint32_t tmp=0;
+if(huart->Instance == UART4)
+{
+	tmp = huart->Instance->DR;
+	tmp = huart->Instance->SR;
 
 }
+HAL_UART_Receive_IT(&huart4, mas, 1);
+//	__HAL_UART_GET_FLAG(huart,UART_FLAG_ORE);
+//	  __HAL_UART_CLEAR_FLAG(huart,UART_FLAG_ORE);
+//	  	  huart->ErrorCode =0;
+//	  	 huart->ErrorCode =0;
+//	  __HAL_UART_CLEAR_FLAG(huart,UART_FLAG_NE);
+//	  __HAL_UART_CLEAR_FLAG(huart,UART_FLAG_FE);
+//	  __HAL_UART_CLEAR_FLAG(huart,UART_FLAG_PE);
+}
+
+
+//}
 
 //void SendAT (const char * S)		//Функция выдачи строковой команды модулю
 //{

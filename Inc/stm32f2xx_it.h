@@ -1,7 +1,7 @@
 /**
   ******************************************************************************
   * @file    stm32f2xx_it.h
-  * @date    25/01/2015 14:18:19
+  * @date    27/01/2015 17:59:17
   * @brief   This file contains the headers of the interrupt handlers.
   ******************************************************************************
   *
@@ -48,9 +48,6 @@
 
 void UART4_IRQHandler(void);
 void SysTick_Handler(void);
-void CAN2_SCE_IRQHandler(void);
-void CAN2_TX_IRQHandler(void);
-void CAN2_RX0_IRQHandler(void);
 
 #ifdef __cplusplus
 }

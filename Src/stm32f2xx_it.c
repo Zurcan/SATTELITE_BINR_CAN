@@ -1,7 +1,7 @@
 /**
   ******************************************************************************
   * @file    stm32f2xx_it.c
-  * @date    25/01/2015 14:18:19
+  * @date    27/01/2015 17:59:17
   * @brief   Interrupt Service Routines.
   ******************************************************************************
   *
@@ -40,7 +40,6 @@
 /* USER CODE END 0 */
 /* External variables --------------------------------------------------------*/
 
-extern CAN_HandleTypeDef hcan2;
 extern UART_HandleTypeDef huart4;
 
 /******************************************************************************/
@@ -57,7 +56,8 @@ void UART4_IRQHandler(void)
   /* USER CODE END UART4_IRQn 0 */
   HAL_UART_IRQHandler(&huart4);
   /* USER CODE BEGIN UART4_IRQn 1 */
-
+//	if(huart4.ErrorCode==UART_FLAG_ORE)
+//		__HAL_UART_CLEAR_FLAG(&huart4,UART_FLAG_ORE);
   /* USER CODE END UART4_IRQn 1 */
 }
 
@@ -74,48 +74,6 @@ void SysTick_Handler(void)
   /* USER CODE BEGIN SysTick_IRQn 1 */
 
   /* USER CODE END SysTick_IRQn 1 */
-}
-
-/**
-* @brief This function handles CAN2 SCE interrupt.
-*/
-void CAN2_SCE_IRQHandler(void)
-{
-  /* USER CODE BEGIN CAN2_SCE_IRQn 0 */
-
-  /* USER CODE END CAN2_SCE_IRQn 0 */
-  HAL_CAN_IRQHandler(&hcan2);
-  /* USER CODE BEGIN CAN2_SCE_IRQn 1 */
-
-  /* USER CODE END CAN2_SCE_IRQn 1 */
-}
-
-/**
-* @brief This function handles CAN2 TX interrupts.
-*/
-void CAN2_TX_IRQHandler(void)
-{
-  /* USER CODE BEGIN CAN2_TX_IRQn 0 */
-
-  /* USER CODE END CAN2_TX_IRQn 0 */
-  HAL_CAN_IRQHandler(&hcan2);
-  /* USER CODE BEGIN CAN2_TX_IRQn 1 */
-
-  /* USER CODE END CAN2_TX_IRQn 1 */
-}
-
-/**
-* @brief This function handles CAN2 RX0 interrupts.
-*/
-void CAN2_RX0_IRQHandler(void)
-{
-  /* USER CODE BEGIN CAN2_RX0_IRQn 0 */
-
-  /* USER CODE END CAN2_RX0_IRQn 0 */
-  HAL_CAN_IRQHandler(&hcan2);
-  /* USER CODE BEGIN CAN2_RX0_IRQn 1 */
-
-  /* USER CODE END CAN2_RX0_IRQn 1 */
 }
 
 /* USER CODE BEGIN 1 */
