@@ -1,7 +1,7 @@
 /**
   ******************************************************************************
   * File Name          : main.c
-  * Date               : 27/01/2015 17:59:17
+  * Date               : 29/01/2015 19:50:49
   * Description        : Main program body
   ******************************************************************************
   *
@@ -101,6 +101,7 @@ bool	h52BINRok;				//флаг притяного массива 52
 uint8_t		h88BINRmas[69];			//массив с принятым пакетом 88
 bool	h88BINRok;				//флаг притяного массива 88
 int dataArrIndex;
+int mesCount =86;
 uint8_t modeCANmsg;
 uint8_t arrCANdata[8];
 unsigned short Serial;//
@@ -198,19 +199,20 @@ int main(void)
   AT_COM[4] = 0x10;
   AT_COM[5] = 0x03;
   HAL_UART_Transmit_IT(&huart4, AT_COM, 6);
-  HAL_Delay(20000);
+//  HAL_Delay(20000);
   /* USER CODE END 2 */
 
   /* USER CODE BEGIN 3 */
   HAL_GPIO_WritePin(CAN_SHDN_PORT,CAN_SHDN_PIN,0);
 
-  HAL_CAN_Receive_IT(&hcan2,CAN_FIFO0);
+//  HAL_CAN_Receive_IT(&hcan2,CAN_FIFO0);
   /* Infinite loop */
   while (1)
   {
 	  if(beginCANTransmitFlag)
 	  {
 		  beginCANTransmitFlag = false;
+		  canMessCounter=0;
 			IIMinstr = IIM_disablePolling_MDUS;
 			char msgtype = 0x0;
 			char devtype = SatteliteModule;
@@ -222,50 +224,56 @@ int main(void)
 //			setTxDataMessage(SatteliteModule);
 //			parseArray(h41BINRmas,12,0x41,resArr1,&arr1len);
 //			parseArray(h88BINRmas,69,0x88,resArr2,&arr2len);
-			volatile uint8_t resArr[49];
+			volatile uint8_t resArr[599];
 //			volatile int sor = sizeof(resArr);
-			for(int i = 0; i < 12; i++)
-			{
-				 if(i < 8)
-				 {
-					 resArr[i] = h41BINRmas[i];
-				 }
-			}
 			for(int i = 0; i < 69; i++)
 			{
-				 if(i < 40)
-				 {
-					 resArr[i+8] = h88BINRmas[i];
-				 }
-				 else if(i==68)
+//				 if(i < 8)
+//				 {
 					 resArr[i] = h88BINRmas[i];
+//				 }
+			}
+			for(int i = 0; i < 530; i++)
+			{
+//				 if(i < 40)
+//				 {
+					 resArr[i+69] = hE4BINRmas[i];
+//				 }
+//				 else if(i==68)
+//					 resArr[i] = h88BINRmas[i];
 			}
 			int arrIndex=0;
-			for(int j = 0; j < 10; j++)
+
+			for(int j = 0; j < mesCount; j++)
 			{
 				for(int a = 0; a < 8; a++)
 				{
 					mesMode = 1;
 					if(a!=7)
-						framedMessagesArr[j].Data[a] = resArr[arrIndex++];
+					{
+						if(a*j < sizeof(resArr))
+							framedMessagesArr[j].Data[a] = resArr[arrIndex++];
+						else
+							framedMessagesArr[j].Data[a] =0;
+					}
 					else
 						framedMessagesArr[j].Data[a] = j;
 				}
 				if(j==0)
 				{
 					mesMode = 3;
-					framedMessagesArr[j].Data[7] = 7;
+					framedMessagesArr[j].Data[7] = 86;
 				}
-				if(j>=6)
+				if(j>=mesCount-1)
 				{
 					mesMode = 2;
 					framedMessagesArr[j].Data[7] = calcCSofArr(resArr,sizeof(resArr));
 				}
 
 			}
-			for(int b = 0; b < 8; b++)
-				framedMessagesArr[canMessCounter].Data[b] = inc;
-			inc++;
+//			for(int b = 0; b < 8; b++)
+//				framedMessagesArr[canMessCounter].Data[b] = inc;
+//			inc++;
 			prepareSTDID(3,2,3,3);
 			framedMessagesArr[canMessCounter].IDE = CAN_ID_STD;
 			framedMessagesArr[canMessCounter].DLC = 8;
@@ -273,14 +281,29 @@ int main(void)
 			framedMessagesArr[canMessCounter].StdId = tmpval;
 
 			hcan2.pTxMsg = &framedMessagesArr[canMessCounter++];
-			volatile HAL_StatusTypeDef hererr= HAL_CAN_Transmit_IT(&hcan2);
+			volatile HAL_StatusTypeDef hererr= HAL_CAN_Transmit(&hcan2,1);
 			//HAL_Delay(0);
-			volatile uint32_t her = hcan2.Instance->ESR;
+			//volatile uint32_t her = hcan2.Instance->ESR;
 			//__HAL_CAN_CANCEL_TRANSMIT(&hcan2, 0);
 			//__HAL_CAN_CANCEL_TRANSMIT(&hcan2, 1);
 			//__HAL_CAN_CANCEL_TRANSMIT(&hcan2, 2);
-			volatile uint32_t i=5*her;
-			HAL_Delay(10);
+			while(canMessCounter<mesCount)
+				{
+					if(canMessCounter<mesCount-1)
+						prepareSTDID(1,2,3,3);
+					else
+						prepareSTDID(2,2,3,3);
+					hcan2.pTxMsg = &framedMessagesArr[canMessCounter];
+					framedMessagesArr[canMessCounter].IDE = CAN_ID_STD;
+					framedMessagesArr[canMessCounter].DLC = 8;
+					uint32_t tmp = *(uint32_t*)&STDID;
+					framedMessagesArr[canMessCounter++].StdId =tmp;
+					HAL_CAN_Transmit(&hcan2,1);
+			//		beginCANTransmitFlag = false;
+				}
+//			else canMessCounter=0;
+//			volatile uint32_t i=5*her;
+//			HAL_Delay(10);
 //			HAL_CAN_Transmit_IT(&hcan2);
 //			beginCANTransmitFlag = false;
 //			tmpstatus = HAL_CAN_Transmit(&CanHandle,10);
@@ -605,24 +628,24 @@ void HAL_CAN_ErrorCallback(CAN_HandleTypeDef *hcan)
 //}
 void HAL_CAN_TxCpltCallback(CAN_HandleTypeDef* hcan)
 {
-	if(hcan->Instance==CAN2)
-	{
-		if(canMessCounter<10)
-			{
-				if(canMessCounter<8)
-					prepareSTDID(1,2,3,3);
-				else
-					prepareSTDID(2,2,3,3);
-				hcan2.pTxMsg = &framedMessagesArr[canMessCounter];
-				framedMessagesArr[canMessCounter].IDE = CAN_ID_STD;
-				framedMessagesArr[canMessCounter].DLC = 8;
-				uint32_t tmp = *(uint32_t*)&STDID;
-				framedMessagesArr[canMessCounter++].StdId =tmp;
-				HAL_CAN_Transmit_IT(&hcan2);
-		//		beginCANTransmitFlag = false;
-			}
-		else canMessCounter=0;
-	}
+//	if(hcan->Instance==CAN2)
+//	{
+//		if(canMessCounter<mesCount)
+//			{
+//				if(canMessCounter<mesCount-1)
+//					prepareSTDID(1,2,3,3);
+//				else
+//					prepareSTDID(2,2,3,3);
+//				hcan2.pTxMsg = &framedMessagesArr[canMessCounter];
+//				framedMessagesArr[canMessCounter].IDE = CAN_ID_STD;
+//				framedMessagesArr[canMessCounter].DLC = 8;
+//				uint32_t tmp = *(uint32_t*)&STDID;
+//				framedMessagesArr[canMessCounter++].StdId =tmp;
+//				HAL_CAN_Transmit_IT(&hcan2);
+//		//		beginCANTransmitFlag = false;
+//			}
+//		else canMessCounter=0;
+//	}
 //	if(HAL_CAN_GetState(&hcan2)==HAL_CAN_STATE_READY)
 //	{
 
@@ -863,11 +886,11 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 	  							hE4BINRok = true;
 	  										//флаг притяного массива Е4
 //	  							h88BINRok=true;				//флаг притяного массива Е4
-	  							if(h88BINRok&&h41BINRok)
+	  							if(h88BINRok)
 	  							{
 //	  								HAL_GPIO_TogglePin(CAN_SHDN_PORT,CAN_SHDN_PIN);
 
-//	  								beginCANTransmitFlag = true;
+	  								beginCANTransmitFlag = true;
 	  								NumberSatateRxBINR=sHEAD;
 	  							}
 	  							else
@@ -900,9 +923,16 @@ if(huart->Instance == UART4)
 {
 	tmp = huart->Instance->DR;
 	tmp = huart->Instance->SR;
-
+//	tmp = huart->Instance->DR;
+//	__HAL_UART_GET_FLAG(huart,UART_FLAG_NE);
+//	__HAL_UART_GET_FLAG(huart,UART_FLAG_PE);
+//	__HAL_UART_GET_FLAG(huart,UART_FLAG_FE);
+//		  __HAL_UART_CLEAR_FLAG(huart,UART_FLAG_NE);
+//		  __HAL_UART_CLEAR_FLAG(huart,UART_FLAG_FE);
+//		  __HAL_UART_CLEAR_FLAG(huart,UART_FLAG_PE);
+	HAL_UART_Receive_IT(huart, mas, 1);
 }
-HAL_UART_Receive_IT(&huart4, mas, 1);
+
 //	__HAL_UART_GET_FLAG(huart,UART_FLAG_ORE);
 //	  __HAL_UART_CLEAR_FLAG(huart,UART_FLAG_ORE);
 //	  	  huart->ErrorCode =0;

@@ -1,5 +1,5 @@
 #MicroXplorer Configuration settings - do not modify
-#Tue Jan 27 17:59:16 MSK 2015
+#Thu Jan 29 19:50:49 MSK 2015
 CAN2.ABOM-Slave=DISABLE
 CAN2.AWUM-Slave=DISABLE
 CAN2.BS1-Slave=CAN_BS1_6TQ

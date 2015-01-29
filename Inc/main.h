@@ -9,7 +9,7 @@
 #define INC_MAIN_H_
 #include "stdbool.h"
 CanTxMsgTypeDef TxMessage;
-CanTxMsgTypeDef framedMessagesArr[10];
+CanTxMsgTypeDef framedMessagesArr[86];
 typedef struct
 {
 	short LAx;			//linearic acceleration on X-axis
