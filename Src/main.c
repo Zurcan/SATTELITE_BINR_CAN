@@ -1,7 +1,7 @@
 /**
   ******************************************************************************
   * File Name          : main.c
-  * Date               : 29/01/2015 19:50:49
+  * Date               : 12/02/2015 15:49:38
   * Description        : Main program body
   ******************************************************************************
   *
@@ -287,12 +287,15 @@ int main(void)
 			//__HAL_CAN_CANCEL_TRANSMIT(&hcan2, 0);
 			//__HAL_CAN_CANCEL_TRANSMIT(&hcan2, 1);
 			//__HAL_CAN_CANCEL_TRANSMIT(&hcan2, 2);
+			int tmpmesCount = mesCount-1;
 			while(canMessCounter<mesCount)
 				{
-					if(canMessCounter<mesCount-1)
-						prepareSTDID(1,2,3,3);
+					if(canMessCounter<tmpmesCount)
+						prepareSTDID(3,2,1,3);
 					else
-						prepareSTDID(2,2,3,3);
+					{
+						prepareSTDID(3,2,2,3);
+					}
 					hcan2.pTxMsg = &framedMessagesArr[canMessCounter];
 					framedMessagesArr[canMessCounter].IDE = CAN_ID_STD;
 					framedMessagesArr[canMessCounter].DLC = 8;

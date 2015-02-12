@@ -1,7 +1,7 @@
 /**
   ******************************************************************************
   * File Name          : CAN.c
-  * Date               : 29/01/2015 19:50:49
+  * Date               : 12/02/2015 15:49:38
   * Description        : This file provides code for the configuration
   *                      of the CAN instances.
   ******************************************************************************
@@ -49,7 +49,7 @@ void MX_CAN2_Init(void)
 {
 
   hcan2.Instance = CAN2;
-  hcan2.Init.Prescaler = 16;
+  hcan2.Init.Prescaler = 2;
   hcan2.Init.Mode = CAN_MODE_NORMAL;
   hcan2.Init.SJW = CAN_SJW_1TQ;
   hcan2.Init.BS1 = CAN_BS1_6TQ;
