@@ -1,7 +1,7 @@
 /**
   ******************************************************************************
   * File Name          : main.c
-  * Date               : 12/02/2015 15:49:38
+  * Date               : 05/06/2015 09:28:18
   * Description        : Main program body
   ******************************************************************************
   *
@@ -131,6 +131,9 @@ void SystemClock_Config(void);
 #define RESET_CSM_PORT GPIOB
 #define RESET_CSM_PIN GPIO_PIN_7
 
+#define LED_1_PORT GPIOE
+#define LED_1_PIN  GPIO_PIN_2
+
 #define __HAL_CAN_CANCEL_TRANSMIT(__HANDLE__, __TRANSMITMAILBOX__)\
 (((__TRANSMITMAILBOX__) == CAN_TXMAILBOX_0)? ((__HANDLE__)->Instance->TSR |= CAN_TSR_ABRQ0) :\
  ((__TRANSMITMAILBOX__) == CAN_TXMAILBOX_1)? ((__HANDLE__)->Instance->TSR |= CAN_TSR_ABRQ1) :\
@@ -163,7 +166,7 @@ int main(void)
   inc = 0;
   HAL_GPIO_WritePin(RESET_CSM_PORT,RESET_CSM_PIN,1);
   HAL_UART_Receive_IT(&huart4, mas, 1); //Принимает в массив байты строки
-
+//  HAL_CAN_Receive_IT(&hcan2,CAN_FIFO0);
   AT_COM[0] = 0x10;
   AT_COM[1] = 0x0e;
   AT_COM[2] = 0x10;
@@ -204,6 +207,7 @@ int main(void)
 
   /* USER CODE BEGIN 3 */
   HAL_GPIO_WritePin(CAN_SHDN_PORT,CAN_SHDN_PIN,0);
+//  CanRxMsgTypeDef *rxmes;
 
 //  HAL_CAN_Receive_IT(&hcan2,CAN_FIFO0);
   /* Infinite loop */
@@ -278,6 +282,7 @@ int main(void)
 			framedMessagesArr[canMessCounter].IDE = CAN_ID_STD;
 			framedMessagesArr[canMessCounter].DLC = 8;
 			volatile uint32_t tmpval = *(uint32_t*)&STDID;
+			volatile int tmp2=0;
 			framedMessagesArr[canMessCounter].StdId = tmpval;
 
 			hcan2.pTxMsg = &framedMessagesArr[canMessCounter++];
@@ -302,6 +307,12 @@ int main(void)
 					uint32_t tmp = *(uint32_t*)&STDID;
 					framedMessagesArr[canMessCounter++].StdId =tmp;
 					HAL_CAN_Transmit(&hcan2,1);
+
+//					HAL_CAN_Receive(&hcan2,CAN_FIFO0/*hcan2.pRxMsg->FIFONumber*/,1);
+//					rxmes = hcan2.pRxMsg;
+//
+//					tmp2++;
+//					HAL_CAN_Receive_IT(&hcan2,CAN_FIFO0);
 			//		beginCANTransmitFlag = false;
 				}
 //			else canMessCounter=0;
@@ -353,6 +364,29 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+int checkLattitudeLongtitude(char *arr)
+{
+	volatile char arr1[8],arr2[8],arr3[8];
+	volatile double lattitude = 0,longtitude = 0, altitude=0;
+	volatile double *l1,*l2,*a1;
+	for(int i = 0; i < 8; i++)
+		arr1[i] = *arr++;
+	for(int i = 0; i < 8; i++)
+		arr2[i] = *arr++;
+	for(int i = 0; i < 8; i++)
+		arr3[i] = *arr++;
+	l1 = (double*)arr1;
+	l2 = (double*)arr2;
+	a1 = (double*)arr3;
+	lattitude = *l1;
+	longtitude = *l2;
+	altitude = *a1;
+	if((lattitude==0)&(longtitude==0))//&(altitude==0))
+		HAL_GPIO_WritePin(LED_1_PORT,LED_1_PIN,GPIO_PIN_SET);//(CAN_SHDN_PORT,CAN_SHDN_PIN);
+	else
+		HAL_GPIO_WritePin(LED_1_PORT,LED_1_PIN,GPIO_PIN_RESET);
+	return 0;
+}
 void prepareSTDID(char mestype, char mtype, char ttype, char priority)
 {
 //	STDID->messageType = mestype&0x07;
@@ -617,6 +651,7 @@ void HAL_CAN_ErrorCallback(CAN_HandleTypeDef *hcan)
 //		  {
 //			  __HAL_CAN_CANCEL_TRANSMIT(hcan,2);
 //		  }
+		  HAL_CAN_Receive_IT(&hcan2,CAN_FIFO0);
 	}
 }
 
@@ -847,9 +882,11 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 	  		#endif
 	  							for(CntU4=0;CntU4<=CntRxBINR;CntU4++)
 	  							{
+	  								h88BINRmas[CntU4] = 0;
 	  								h88BINRmas[CntU4]=RxBINR[CntU4+1];
 	  							}
 	  							h88BINRok=true;
+	  							checkLattitudeLongtitude(h88BINRmas);
 //	  							if(h41BINRok)
 //	  							{
 //	  											//флаг притяного массива Е4

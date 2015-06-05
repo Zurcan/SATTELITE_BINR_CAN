@@ -75,12 +75,7 @@
   * @param  None
   * @retval None
   */
-//void HAL_MspInit(void)
-//{
-//  /* NOTE : This function is generated automatically by MicroXplorer and eventually
-//            modified by the user
-//   */
-//}
+
 
 /**
   * @brief  DeInitializes the Global MSP.
