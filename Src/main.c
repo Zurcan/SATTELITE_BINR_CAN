@@ -1,7 +1,7 @@
 /**
   ******************************************************************************
   * File Name          : main.c
-  * Date               : 25/01/2015 14:18:19
+  * Date               : 21/06/2015 22:27:53
   * Description        : Main program body
   ******************************************************************************
   *
@@ -159,6 +159,18 @@ int main(void)
   MX_USART2_UART_Init();
 
   /* USER CODE BEGIN 2 */
+  CAN_FilterConfTypeDef sFilterConfig;
+  sFilterConfig.BankNumber = 0;
+  sFilterConfig.FilterActivation = ENABLE;
+  sFilterConfig.FilterFIFOAssignment = CAN_FILTER_FIFO0;
+  sFilterConfig.FilterIdHigh = 0x0;// ДЛУ
+  sFilterConfig.FilterIdLow = 0x000C;
+  sFilterConfig.FilterMaskIdHigh = 0x0;
+  sFilterConfig.FilterMaskIdLow = 0x0;
+  sFilterConfig.FilterMode = CAN_FILTERMODE_IDMASK;
+  sFilterConfig.FilterNumber = 0;
+  sFilterConfig.FilterScale = CAN_FILTERSCALE_32BIT;
+  HAL_CAN_ConfigFilter(&hcan2, &sFilterConfig);
   inc = 0;
   HAL_GPIO_WritePin(RESET_CSM_PORT,RESET_CSM_PIN,1);
   HAL_UART_Receive_IT(&huart4, mas, 1); //Принимает в массив байты строки
@@ -201,15 +213,20 @@ int main(void)
   HAL_Delay(100);
   /* USER CODE END 2 */
 
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
+  while (1)
+  {
+  /* USER CODE END WHILE */
+
   /* USER CODE BEGIN 3 */
   HAL_GPIO_WritePin(CAN_SHDN_PORT,CAN_SHDN_PIN,0);
 
-  HAL_CAN_Receive_IT(&hcan2,CAN_FIFO0);
-  /* Infinite loop */
-  while (1)
-  {
+  if(HAL_CAN_Receive_IT(&hcan2,CAN_FIFO0)!=HAL_OK)
+  	  {
+		Error_Handler();
+  	  }
 	  if(beginCANTransmitFlag)
-	  {
 		  beginCANTransmitFlag = false;
 			IIMinstr = IIM_disablePolling_MDUS;
 			char msgtype = 0x0;
@@ -287,14 +304,13 @@ int main(void)
 			//HAL_Delay(2);
 //			someCounter++;
 //			while(makeFramedCANMessage(&dataArrIndex,arrCANdata,&modeCANmsg)!=0)
-//			{
 //
 //			}
 	  }
   }
   /* USER CODE END 3 */
 
-}
+//}
 
 /** System Clock Configuration
 */
@@ -564,13 +580,45 @@ void prepareEXTID(short serial, char msgtype,char devtype,char priority, char ms
 	EXTID->unused = 0;
 
 }
+void Error_Handler()
+{
+	volatile uint32_t tmpError=0;
+	volatile HAL_CAN_StateTypeDef tmpStatus=0;
+	tmpError = HAL_CAN_GetError(&hcan2);
+	if(tmpError==0)
+	{
+		tmpStatus = HAL_CAN_GetState(&hcan2);
+	}
+	if(tmpStatus!=HAL_CAN_STATE_READY)
+	{
+		hcan2.State = HAL_CAN_STATE_READY;
+//		HAL_CAN_DeInit(&hcan2);
+//		HAL_CAN_Init(&hcan2);
+	}
+
+}
+
 void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan)
 {
+	if (hcan->pRxMsg->FIFONumber == 0)
+	{
 
+	}
+	if (hcan->pRxMsg->FIFONumber == 1)
+	{
+
+	}
 	if(hcan->Instance==CAN2)
 	{
-		HAL_CAN_Receive_IT(&hcan2,CAN_FIFO0);
+//		HAL_CAN_Receive_IT(&hcan2,CAN_FIFO0);
+		counter++;
+		//HAL_GPIO_TogglePin(LED_LEG_PORT,LED_LEG_PIN);
 	}
+	HAL_CAN_Receive_IT(&hcan2,CAN_FIFO0);
+//	if(HAL_CAN_Receive_IT(&hcan2,CAN_FIFO0)!= HAL_OK)
+//	{
+//		Error_Handler();
+//	}
 }
 void HAL_CAN_ErrorCallback(CAN_HandleTypeDef *hcan)
 {

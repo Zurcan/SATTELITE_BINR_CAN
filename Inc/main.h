@@ -102,6 +102,8 @@ MDADdataType MDADTransmitData;
 CAN_HandleTypeDef CanHandle;
 configIIM IIMConf;
 
+int counter;
+
 char makeFramedCANMessage(int *currentArrIndex, uint8_t *outArr, uint8_t *mode);
 char parseArray(uint8_t *inArr, uint16_t inArrLength, int arrType, uint8_t *outArr, uint16_t *outArrLength);
 uint8_t calcCSofArr(uint8_t *arr, uint8_t arrSize);
