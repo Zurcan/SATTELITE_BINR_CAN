@@ -1,7 +1,6 @@
 /**
   ******************************************************************************
   * File Name          : CAN.c
-  * Date               : 21/06/2015 22:27:52
   * Description        : This file provides code for the configuration
   *                      of the CAN instances.
   ******************************************************************************
@@ -50,14 +49,14 @@ void MX_CAN2_Init(void)
 
   hcan2.Instance = CAN2;
   hcan2.Init.Prescaler = 16;
-  hcan2.Init.Mode = CAN_MODE_LOOPBACK;
+  hcan2.Init.Mode = CAN_MODE_NORMAL;
   hcan2.Init.SJW = CAN_SJW_1TQ;
   hcan2.Init.BS1 = CAN_BS1_8TQ;
   hcan2.Init.BS2 = CAN_BS2_6TQ;
   hcan2.Init.TTCM = DISABLE;
   hcan2.Init.ABOM = DISABLE;
   hcan2.Init.AWUM = DISABLE;
-  hcan2.Init.NART = DISABLE;
+  hcan2.Init.NART = ENABLE;
   hcan2.Init.RFLM = DISABLE;
   hcan2.Init.TXFP = DISABLE;
   HAL_CAN_Init(&hcan2);

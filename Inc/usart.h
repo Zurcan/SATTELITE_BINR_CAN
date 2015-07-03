@@ -1,7 +1,6 @@
 /**
   ******************************************************************************
   * File Name          : USART.h
-  * Date               : 21/06/2015 22:27:53
   * Description        : This file provides code for the configuration
   *                      of the USART instances.
   ******************************************************************************

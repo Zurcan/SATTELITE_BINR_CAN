@@ -1,7 +1,6 @@
 /**
   ******************************************************************************
   * File Name          : main.c
-  * Date               : 21/06/2015 22:27:53
   * Description        : Main program body
   ******************************************************************************
   *
@@ -340,6 +339,10 @@ void SystemClock_Config(void)
 
   HAL_RCC_EnableCSS();
 
+  HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
+
+  HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
+
 }
 
 /* USER CODE BEGIN 4 */
@@ -620,6 +623,7 @@ void HAL_CAN_RxCpltCallback(CAN_HandleTypeDef* hcan)
 //		Error_Handler();
 //	}
 }
+
 void HAL_CAN_ErrorCallback(CAN_HandleTypeDef *hcan)
 {
 	__IO uint32_t ERR;

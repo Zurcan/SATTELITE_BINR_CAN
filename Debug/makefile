@@ -59,7 +59,7 @@ all: SATTELITE_BINR_CAN.elf secondary-outputs
 SATTELITE_BINR_CAN.elf: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: Cross ARM C++ Linker'
-	arm-none-eabi-g++ -mcpu=cortex-m3 -mthumb -Og -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections -Wunused -Wuninitialized -Wall -Wextra -Wmissing-declarations -Wconversion -Wpointer-arith -Wpadded -Wshadow -Wlogical-op -Waggregate-return -Wfloat-equal  -g3 -T "C:\stm32Eclipse\workspace\SATTELITE_BINR_CAN\Projects\TrueSTUDIO\22 Configuration\STM32F205VG_FLASH.ld" -nostartfiles -Xlinker --gc-sections -Wl,-Map,"SATTELITE_BINR_CAN.map" -o "SATTELITE_BINR_CAN.elf" $(OBJS) $(USER_OBJS) $(LIBS)
+	arm-none-eabi-g++ -mcpu=cortex-m3 -mthumb -Og -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections -Wunused -Wuninitialized -Wall -Wextra -Wmissing-declarations -Wconversion -Wpointer-arith -Wpadded -Wshadow -Wlogical-op -Waggregate-return -Wfloat-equal  -g3 -T "C:\workspaceluna\SATTELITE_BINR_CAN\Projects\TrueSTUDIO\22 Configuration\STM32F205VG_FLASH.ld" -nostartfiles -Xlinker --gc-sections -Wl,-Map,"SATTELITE_BINR_CAN.map" -o "SATTELITE_BINR_CAN.elf" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
